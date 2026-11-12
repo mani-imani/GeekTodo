@@ -19,7 +19,7 @@ export function normalize(s) {
 export function mount(container) {
   search = h('input', {
     type: 'search', role: 'searchbox', class: 'search-input', placeholder: 'جست‌وجو در آرشیو…', 'aria-label': 'جست‌وجو در آرشیو',
-    enterkeyhint: 'search', autocomplete: 'off', dir: 'auto',
+    enterkeyhint: 'search', autocomplete: 'off', dir: 'rtl',
   });
   let timer;
   search.addEventListener('input', () => {

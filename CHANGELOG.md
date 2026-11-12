@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0 · Nov 2026
+- Install card from the first visit, on every browser that can install the app: the browser's own install prompt where it offers one, otherwise step-by-step instructions for iPhone and iPad, Android, Mac and desktop Chrome or Edge. Settings also has an "install on this device" button.
+- Sound: the audio is woken on every tap, not only the first one, so it keeps working in the installed app after it comes back from the background. Sounds wait until the audio is running instead of being lost.
+- No accidental zoom: pinch and double-tap zoom are off inside the app (text size is a setting), and every input is at least 16px so iOS no longer zooms in when you type.
+- Archive search is right-to-left, placeholder included.
+
 ## v1.1.0 · Nov 2026
 - Joins the GeekMani product family: the brand icon (navy square, white check, green cursor), the "Geek**Todo**▍" wordmark in the top bar, and the brand colors for light and dark themes.
 - Navy is the default accent color. The other accent colors are still available in Settings.

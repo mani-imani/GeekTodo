@@ -120,6 +120,11 @@ function updateDate() {
 // ---------- banners (install + backup reminder) ----------
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = () => /android/i.test(navigator.userAgent);
+const isFirefoxDesktop = () => /firefox/i.test(navigator.userAgent) && !isAndroid();
+const isMacSafari = () => !isIOS() && /macintosh/i.test(navigator.userAgent) && /safari/i.test(navigator.userAgent) && !/chrome|chromium|edg/i.test(navigator.userAgent);
+/** Can this browser install the app at all (with its own prompt or by hand)? Firefox on desktop cannot. */
+const canInstall = () => !isStandalone() && (deferredInstall || isIOS() || isAndroid() || !isFirefoxDesktop());
 
 function renderBanners(slot) {
   if (!slot) return;
@@ -143,25 +148,31 @@ function renderBanners(slot) {
     }
   }
 
-  // install suggestion (only when no other banner is showing)
-  if (!slot.childElementCount && s.installPrompt && !meta.installDismissed && !isStandalone() && taskCount >= 1 && (deferredInstall || isIOS())) {
+  // install suggestion: from the first visit, on every browser that can install (only when no other banner is showing)
+  if (!slot.childElementCount && s.installPrompt && !meta.installDismissed && canInstall()) {
     const dismiss = async () => { meta.installDismissed = true; await setMeta('installDismissed', true); renderBanners(slot); };
     slot.append(banner({
       icon: 'phone',
-      text: 'نصبش کن تا مثل یک اپ واقعی، تمام‌صفحه و بدون اینترنت باز شود.',
+      text: 'GeekTodo را می‌شود مثل یک اپ نصب کرد: تمام‌صفحه باز می‌شود و بدون اینترنت هم کار می‌کند.',
       actions: [
-        deferredInstall
-          ? { label: 'نصب', primary: true, run: async () => {
-            deferredInstall.prompt();
-            const { outcome } = await deferredInstall.userChoice.catch(() => ({}));
-            deferredInstall = null;
-            if (outcome === 'accepted') await dismiss(); else renderBanners(slot);
-          } }
-          : { label: 'چطور؟', primary: true, run: iosGuide },
+        { label: deferredInstall ? 'نصب' : 'چطور؟', primary: true, run: async () => { if (await runInstall()) await dismiss(); else renderBanners(slot); } },
       ],
       onClose: dismiss,
     }));
   }
+}
+
+/** Install: the browser's own prompt when it offers one, otherwise the steps for this device. Returns true when installed. */
+async function runInstall() {
+  if (deferredInstall) {
+    const p = deferredInstall;
+    deferredInstall = null;
+    p.prompt();
+    const { outcome } = await p.userChoice.catch(() => ({}));
+    return outcome === 'accepted';
+  }
+  installGuide();
+  return false;
 }
 
 function banner({ icon: ic, text, actions, onClose }) {
@@ -173,14 +184,37 @@ function banner({ icon: ic, text, actions, onClose }) {
       onClose ? h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'بستن', html: icon('x'), onclick: onClose }) : null));
 }
 
-function iosGuide() {
-  sheet(h('ol', { class: 'guide' },
-    h('li', { html: `در Safari دکمه‌ی اشتراک‌گذاری ${icon('share', 'inline')} را بزن.` }),
-    h('li', { html: `گزینه‌ی «Add to Home Screen» ${icon('addSquare', 'inline')} را انتخاب کن.` }),
-    h('li', {}, '«Add» را بزن. حالا GeekTodo مثل یک اپ روی صفحه‌ی اصلی است و بدون اینترنت هم کار می‌کند.')),
-  { title: 'نصب روی آیفون', className: 'sheet-small' });
+function installGuide() {
+  const done = h('li', {}, 'حالا GeekTodo مثل یک اپ روی صفحه‌ی اصلی است و بدون اینترنت هم کار می‌کند.');
+  let title, steps;
+  if (isIOS()) {
+    title = 'نصب روی آیفون و آیپد';
+    steps = [
+      h('li', { html: `در نوار مرورگر (Safari یا Chrome) دکمه‌ی اشتراک‌گذاری ${icon('share', 'inline')} را بزن.` }),
+      h('li', { html: `گزینه‌ی «<bdi>Add to Home Screen</bdi>» ${icon('addSquare', 'inline')} را انتخاب کن.` }),
+      h('li', { html: 'بالای صفحه «<bdi>Add</bdi>» را بزن.' }), done];
+  } else if (isAndroid()) {
+    title = 'نصب روی اندروید';
+    steps = [
+      h('li', { html: 'منوی مرورگر (سه نقطه‌ی بالا یا پایین صفحه) را باز کن.' }),
+      h('li', { html: 'گزینه‌ی «<bdi>Install app</bdi>» یا «<bdi>Add to Home screen</bdi>» را بزن.' }),
+      h('li', { html: 'تأیید کن.' }), done];
+  } else if (isMacSafari()) {
+    title = 'نصب روی مک';
+    steps = [
+      h('li', { html: 'از منوی <bdi>File</bdi> گزینه‌ی «<bdi>Add to Dock</bdi>» را بزن.' }),
+      h('li', { html: '«<bdi>Add</bdi>» را بزن. GeekTodo در Dock و Launchpad می‌آید.' })];
+  } else {
+    title = 'نصب روی کامپیوتر';
+    steps = [
+      h('li', { html: 'در Chrome یا Edge، آیکون نصب را در انتهای نوار آدرس بزن.' }),
+      h('li', { html: 'اگر آیکون نبود، از منوی مرورگر گزینه‌ی «<bdi>Install GeekTodo</bdi>» را بزن.' }),
+      h('li', {}, 'GeekTodo در پنجره‌ی خودش باز می‌شود و میان برنامه‌های سیستم هم پیدا می‌شود.')];
+  }
+  sheet(h('ol', { class: 'guide' }, ...steps), { title, className: 'sheet-small' });
 }
 
+document.addEventListener('geektodo:install', () => { runInstall(); });
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstall = e;
@@ -265,7 +299,12 @@ async function boot() {
       setTimeout(() => listView.focusComposer(), 30);
     }
   });
-  document.addEventListener('pointerdown', unlockAudio, { once: true });
+  // keep audio alive: browsers (iOS above all) suspend it when the app goes to the background,
+  // and only a user gesture may start it again
+  for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, unlockAudio, { passive: true });
+  // no pinch or double-tap zoom inside the app (text size lives in Settings)
+  for (const ev of ['gesturestart', 'gesturechange']) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   registerSW();
 }
 

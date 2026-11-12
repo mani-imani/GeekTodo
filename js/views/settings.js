@@ -170,7 +170,10 @@ export async function render() {
             render();
           },
         }, 'درخواست'), 'جلوی پاک شدن خودکار داده‌ها به دست مرورگر را می‌گیرد'),
-      toggle('installPrompt', 'پیشنهاد نصب روی صفحه')),
+      toggle('installPrompt', 'پیشنهاد نصب روی صفحه'),
+      (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true)
+        ? null
+        : h('button', { class: 'btn btn-small', type: 'button', onclick: () => document.dispatchEvent(new CustomEvent('geektodo:install')) }, 'نصب GeekTodo روی این دستگاه')),
 
     h('footer', { class: 'about muted small' },
       h('p', {}, `GeekTodo · نسخه‌ی ${APP_VERSION}`),

@@ -8,7 +8,7 @@
 <p align="center">A simple, offline, personal to-do list in Persian: you finish a task by striking it through, like a note on paper.</p>
 
 <p align="center"><a href="https://mani-imani.github.io/GeekTodo/"><b>mani-imani.github.io/GeekTodo</b></a></p>
-<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v1.1.0</code></p>
+<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v1.2.0</code></p>
 
 ---
 
@@ -110,7 +110,7 @@ fonts/                وزیرمتن (OFL)
 
 ### نسخه
 
-<code dir="ltr">v1.1.0</code> · تغییرات در [CHANGELOG.md](CHANGELOG.md).
+<code dir="ltr">v1.2.0</code> · تغییرات در [CHANGELOG.md](CHANGELOG.md).
 
 </div>
 
@@ -201,7 +201,7 @@ Export files carry a `schema_version` so later versions can read older data.
 Code under the MIT license ([LICENSE](LICENSE)). The Vazirmatn font is by Saber Rastikerdar, under the SIL OFL 1.1 ([fonts/OFL.txt](fonts/OFL.txt)).
 
 ### Version
-`v1.1.0` · see [CHANGELOG.md](CHANGELOG.md).
+`v1.2.0` · see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

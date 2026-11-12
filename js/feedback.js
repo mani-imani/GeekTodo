@@ -4,18 +4,41 @@ import { settings } from './store.js';
 let ctx = null;
 let noiseBuf = null;
 
+let primed = false;
+
 function audio() {
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    ctx = new AC();
+    ctx = new AC({ latencyHint: 'interactive' });
   }
-  if (ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
 
-/** Call from the first user gesture so iOS unlocks audio. */
-export function unlockAudio() { if (settings().sound) audio(); }
+/** Wake the audio context. Must run inside a user gesture: iOS (and an installed PWA after it was in the
+ *  background) keeps it 'suspended' or 'interrupted' otherwise. A one-sample silent buffer unlocks iOS. */
+export function unlockAudio() {
+  if (!settings().sound) return;
+  const ac = audio();
+  if (!ac) return;
+  if (ac.state !== 'running') ac.resume().catch(() => {});
+  if (!primed) {
+    primed = true;
+    try {
+      const b = ac.createBuffer(1, 1, 22050);
+      const src = ac.createBufferSource();
+      src.buffer = b; src.connect(ac.destination); src.start(0);
+    } catch { primed = false; }
+  }
+}
+
+/** Run a sound once the context is running (sounds scheduled on a stopped clock would pile up or be lost). */
+function play(fn) {
+  const ac = audio();
+  if (!ac) return;
+  if (ac.state === 'running') { fn(ac); return; }
+  ac.resume().then(() => fn(ac)).catch(() => {});
+}
 
 function noise(ac) {
   if (noiseBuf) return noiseBuf;
@@ -71,26 +94,24 @@ function tone(ac, freq, start, dur, type = 'sine', vol = 0.18, glideTo) {
 export function playDone(durationMs = 380, type) {
   const s = settings();
   if (!s.sound) return;
-  const ac = audio();
-  if (!ac) return;
   const kind = type || s.soundType;
-  const t = ac.currentTime;
-  if (kind === 'scratch') {
-    scratch(ac, Math.max(0.15, durationMs / 1000));
-  } else if (kind === 'pop') {
-    tone(ac, 420, t, 0.14, 'sine', 0.25, 900);
-  } else if (kind === 'chime') {
-    tone(ac, 880, t, 0.35, 'triangle', 0.12);
-    tone(ac, 1318.5, t + 0.08, 0.45, 'triangle', 0.1);
-  }
+  play((ac) => {
+    const t = ac.currentTime;
+    if (kind === 'scratch') {
+      scratch(ac, Math.max(0.15, durationMs / 1000));
+    } else if (kind === 'pop') {
+      tone(ac, 420, t, 0.14, 'sine', 0.25, 900);
+    } else if (kind === 'chime') {
+      tone(ac, 880, t, 0.35, 'triangle', 0.12);
+      tone(ac, 1318.5, t + 0.08, 0.45, 'triangle', 0.1);
+    }
+  });
 }
 
 /** Soft tick for small interactions (undo, reorder drop). */
 export function playTick() {
   if (!settings().sound) return;
-  const ac = audio();
-  if (!ac) return;
-  tone(ac, 1200, ac.currentTime, 0.05, 'sine', 0.05);
+  play((ac) => tone(ac, 1200, ac.currentTime, 0.05, 'sine', 0.05));
 }
 
 export const canVibrate = () => typeof navigator.vibrate === 'function';

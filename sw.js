@@ -1,6 +1,6 @@
 // GeekTodo service worker — cache-first app shell, fully offline.
 // Bump VERSION (and js/version.js) on every release so clients pick up new files.
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const CACHE = `geektodo-${VERSION}`;
 
 const ASSETS = [
