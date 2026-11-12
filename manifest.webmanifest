@@ -1,0 +1,24 @@
+{
+  "name": "GeekTodo",
+  "short_name": "GeekTodo",
+  "description": "فهرست کارهای شخصی، ساده و آفلاین؛ مثل یک یادداشت، با حس خط کشیدن روی کاغذ.",
+  "lang": "fa",
+  "dir": "rtl",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F4F0",
+  "theme_color": "#F4F4F0",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "آرشیو", "url": "./#/archive", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "تقویم", "url": "./#/calendar", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

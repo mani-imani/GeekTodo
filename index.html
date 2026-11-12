@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GeekTodo</title>
+  <meta name="description" content="فهرست کارهای شخصی، ساده و آفلاین؛ مثل یک یادداشت، با حس خط کشیدن روی کاغذ.">
+  <meta name="theme-color" content="#F4F4F0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GeekTodo">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="preload" href="./fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./css/style.css">
+  <script>
+    // apply theme before first paint to avoid a flash
+    try {
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    } catch (e) {}
+  </script>
+  <script type="module" src="./js/main.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">رفتن به محتوا</a>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="#/" aria-label="GeekTodo، فهرست کارها">
+        <img src="./icons/icon-192.png" alt="" width="28" height="28">
+        <span class="brand-name">Geek<b>Todo</b><i></i></span>
+      </a>
+      <span class="today" id="today"></span>
+    </header>
+    <nav class="tabbar" id="nav" aria-label="بخش‌ها"></nav>
+    <main id="main" tabindex="-1"></main>
+  </div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <noscript><p style="padding:2rem">GeekTodo برای کار کردن به جاوااسکریپت نیاز دارد.</p></noscript>
+</body>
+</html>
