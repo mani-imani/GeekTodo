@@ -386,11 +386,18 @@ function startEdit(li, t) {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); finish(true); }
     if (e.key === 'Escape') { e.preventDefault(); finish(false); }
   });
+  // Safari on iPhone and iPad never moves focus to a tapped button: the field just blurs (relatedTarget is null),
+  // and saving on that blur used to remove the trash button before its click arrived, so the task stayed.
+  // pointerdown on the button comes before that blur: remember it, and let blur wait one tick to look.
+  let delPressed = false;
+  del.addEventListener('pointerdown', () => { delPressed = true; });
+  del.addEventListener('pointercancel', () => { delPressed = false; if (document.activeElement !== ta) finish(true); });
   ta.addEventListener('blur', (e) => {
-    if (e.relatedTarget === del) return;
-    finish(true);
+    if (e.relatedTarget === del || delPressed) return;
+    setTimeout(() => { if (!delPressed) finish(true); }, 0);
   });
   del.addEventListener('click', () => {
+    if (finished) return;
     finished = true;
     ta.replaceWith(textEl);
     del.remove();
